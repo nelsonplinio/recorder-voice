@@ -1,0 +1,12 @@
+{
+  "name": "RecorderVoice",
+  "displayName": "RecorderVoice",
+  "expo": {
+    "name": "RecorderVoice",
+    "slug": "RecorderVoice",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
