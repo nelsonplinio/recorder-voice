@@ -29,53 +29,13 @@ import {
 import formatDuration from "../../utils/formatDuration";
 
 const Recorder: React.FC = () => {
-  const [recording, setRecording] = useState<RecordingType>();
-  const [recordingDuration, setRecordingDuration] = useState("00:00");
-
   const {
     startRecorderAudio,
     stopRecorderAudio,
-    onRecordingDuration,
+    durationFormatted,
+    error,
+    isRecording
   } = useRecorder();
-
-  const resetDuration = useCallback(() => {
-    setRecordingDuration("00:00");
-  }, [setRecordingDuration]);
-
-  const startRecorder = useCallback(async () => {
-    const startedRecording = await startRecorderAudio();
-
-    setRecording(startedRecording);
-  }, [startRecorderAudio]);
-
-  const stopRecording = useCallback(() => {
-    if (!recording) {
-      return;
-    }
-
-    const uri = stopRecorderAudio(recording);
-    // todo some thing
-    resetDuration();
-    setRecording(null);
-  }, [recording, stopRecorderAudio, resetDuration]);
-
-  useEffect(() => {
-    return stopRecording;
-  }, [stopRecording]);
-
-  useEffect(() => {
-    if (!recording) {
-      return;
-    }
-
-    onRecordingDuration(recording, ({ duration }: OnRecordingDurationData) => {
-      setRecordingDuration(formatDuration(duration / 1000));
-    });
-  }, [onRecordingDuration, recording]);
-
-  useEffect(() => {
-    resetDuration();
-  }, [recording, resetDuration]);
 
   return (
     <Container>
@@ -85,22 +45,22 @@ const Recorder: React.FC = () => {
       </NameAudioContainer>
 
       <RecorderActionsContainer>
-        <RecorderStartAndPauseButton onPress={startRecorder}>
+        <RecorderStartAndPauseButton onPress={startRecorderAudio}>
           <RecorderStartAndPauseButtonIcon
             name="microphone"
             size={PLAY_PAUSE_BUTTON_SIZE * 0.3}
           />
         </RecorderStartAndPauseButton>
 
-        {recording && (
-          <RecorderStopButton onPress={stopRecording}>
+        {isRecording && (
+          <RecorderStopButton onPress={stopRecorderAudio}>
             <RecorderStopButtonIcon name="stop" color="#e26878" size={42} />
           </RecorderStopButton>
         )}
       </RecorderActionsContainer>
 
       <FooterContainer>
-        <RecorderTimingText>{recordingDuration}</RecorderTimingText>
+        <RecorderTimingText>{durationFormatted}</RecorderTimingText>
         <ActionsContainer>
           <DeleteButton>
             <DeleteButtonText>Deletar</DeleteButtonText>

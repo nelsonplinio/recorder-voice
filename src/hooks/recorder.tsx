@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Audio } from "expo-av";
-import { call } from "react-native-reanimated";
+import formatDuration from "../utils/formatDuration";
 
 type RecordingURI = string;
 
@@ -13,18 +13,23 @@ interface RecorderError {
 }
 interface RecorderData {
   error?: RecorderError;
-  onRecordingDuration: (
-    recording: RecordingType,
-    callback: (data: OnRecordingDurationData) => void
-  ) => void;
+  durationFormatted?: string;
+  recording?: RecordingType;
+  isRecording: boolean;
   startRecorderAudio: () => Promise<RecordingType>;
-  stopRecorderAudio: (recording: RecordingType) => Promise<RecordingURI>;
+  stopRecorderAudio: () => Promise<RecordingURI>;
 }
 
 const RecorderContext = React.createContext<RecorderData>({} as RecorderData);
 
 const RecorderProvider: React.FC = ({ children }) => {
   const [error, setError] = useState<RecorderError>();
+  const [duration, setDuration] = useState<number>(0);
+  const [recording, setRecording] = useState<RecordingType>();
+  
+  const durationFormatted = useMemo(() => formatDuration(duration / 1000), [duration])
+
+  const isRecording = useMemo(() => !!recording, [recording]);
 
   const startRecorderAudio = useCallback(async () => {
     try {
@@ -45,51 +50,61 @@ const RecorderProvider: React.FC = ({ children }) => {
       );
 
       await recording.startAsync();
+      
+      setRecording(recording);
 
       return recording;
     } catch ({ message }) {
       setError({ message });
       return null;
     }
-  }, []);
+  }, [recording]);
 
-  const stopRecorderAudio = useCallback(async (recording: RecordingType) => {
+  const stopRecorderAudio = useCallback(async () => {
+    if (!recording) {
+      return null;
+    }
     try {
-      setError(undefined);
-
       console.log("Stopping recording..");
+
       await recording.stopAndUnloadAsync();
 
       const uri = recording.getURI();
 
       console.log(`Recording stoped, uri: ${uri}`);
 
+      setError(null);
+      setRecording(null);
+      setDuration(0);
+
       return uri;
     } catch ({ message }) {
       setError({ message });
       return null;
     }
-  }, []);
+  }, [recording]);
 
-  const onRecordingDuration = useCallback(
-    (
-      recording: RecordingType,
-      callback: (data: OnRecordingDurationData) => void
-    ) => {
-      recording.setOnRecordingStatusUpdate(({ durationMillis }) => {
-        callback({ duration: durationMillis });
-      });
-    },
-    []
-  );
+  useEffect(() => {
+    if (!recording) {
+      return;
+    }
+    recording.setProgressUpdateInterval(1000)
+    recording.setOnRecordingStatusUpdate(({ durationMillis, isRecording }) => {
+      if (isRecording) {
+        setDuration(durationMillis)
+      }
+    })
+  }, [recording])
 
   return (
     <RecorderContext.Provider
       value={{
         startRecorderAudio,
         stopRecorderAudio,
-        onRecordingDuration,
+        recording,
         error,
+        isRecording,
+        durationFormatted
       }}
     >
       {children}
