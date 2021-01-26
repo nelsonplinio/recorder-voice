@@ -26,7 +26,6 @@ import {
   CommentIcon,
   PLAY_PAUSE_BUTTON_SIZE,
 } from "./styles";
-import formatDuration from "../../utils/formatDuration";
 
 const Recorder: React.FC = () => {
   const {
@@ -34,9 +33,30 @@ const Recorder: React.FC = () => {
     stopRecorderAudio,
     durationFormatted,
     error,
-    isRecording
+    isRecording,
+    getAudiosRecorded
+
   } = useRecorder();
 
+
+  useEffect(() => {
+
+    const test = async () => {
+      console.log('aquyiii, ', await getAudiosRecorded())
+    };
+  
+  
+    test();
+  }, [isRecording])
+
+  useEffect(() => {
+    const test = async () => {
+      console.log(await getAudiosRecorded())
+    };
+
+
+    test();
+  }, [isRecording])
   return (
     <Container>
       <NameAudioContainer>

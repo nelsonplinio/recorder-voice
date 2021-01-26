@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Audio } from "expo-av";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AudioRecorded from "../models/AudioRecorded";
 import formatDuration from "../utils/formatDuration";
+import generateAudioRecordedID from "../utils/generateAudioRecordedID";
+
+const AUDIOS_RECORDED_KEY = "@audios-recorded";
 
 type RecordingURI = string;
 
@@ -8,6 +13,7 @@ type RecordingType = Audio.Recording;
 interface OnRecordingDurationData {
   duration: number;
 }
+
 interface RecorderError {
   message: string;
 }
@@ -16,8 +22,9 @@ interface RecorderData {
   durationFormatted?: string;
   recording?: RecordingType;
   isRecording: boolean;
+  getAudiosRecorded: () => Promise<AudioRecorded[]>;
   startRecorderAudio: () => Promise<RecordingType>;
-  stopRecorderAudio: () => Promise<RecordingURI>;
+  stopRecorderAudio: () => Promise<AudioRecorded>;
 }
 
 const RecorderContext = React.createContext<RecorderData>({} as RecorderData);
@@ -26,8 +33,10 @@ const RecorderProvider: React.FC = ({ children }) => {
   const [error, setError] = useState<RecorderError>();
   const [duration, setDuration] = useState<number>(0);
   const [recording, setRecording] = useState<RecordingType>();
-  
-  const durationFormatted = useMemo(() => formatDuration(duration / 1000), [duration])
+
+  const durationFormatted = useMemo(() => formatDuration(duration / 1000), [
+    duration,
+  ]);
 
   const isRecording = useMemo(() => !!recording, [recording]);
 
@@ -50,7 +59,7 @@ const RecorderProvider: React.FC = ({ children }) => {
       );
 
       await recording.startAsync();
-      
+
       setRecording(recording);
 
       return recording;
@@ -58,7 +67,50 @@ const RecorderProvider: React.FC = ({ children }) => {
       setError({ message });
       return null;
     }
-  }, [recording]);
+  }, []);
+
+  const getAudiosRecorded = useCallback(async () => {
+    const audioSaved = await AsyncStorage.getItem(AUDIOS_RECORDED_KEY);
+    console.log("getAudiosRecorded");
+    if (!audioSaved) {
+      return [];
+    }
+
+    const audioRecoved = JSON.parse(audioSaved) as [];
+
+    return audioRecoved.map(
+      ({ id, name, duration: arDuration, uri, createDate }) =>
+        ({
+          id,
+          name,
+          duration: arDuration,
+          uri,
+          createDate: new Date(createDate),
+        } as AudioRecorded)
+    );
+  }, []);
+
+  const saveNewAudioRecorder = useCallback(
+    async (newAudioRecorded: Omit<AudioRecorded, "id">) => {
+      const audiosRecorded = await getAudiosRecorded();
+
+      console.log(`New audio Saved in ${newAudioRecorded.uri}`);
+
+      const audioToSave: AudioRecorded = {
+        id: await generateAudioRecordedID(),
+        ...newAudioRecorded,
+        createDate: new Date(),
+      };
+
+      await AsyncStorage.setItem(
+        AUDIOS_RECORDED_KEY,
+        JSON.stringify([audioToSave, ...audiosRecorded])
+      );
+
+      return audioToSave;
+    },
+    [getAudiosRecorded]
+  );
 
   const stopRecorderAudio = useCallback(async () => {
     if (!recording) {
@@ -73,28 +125,36 @@ const RecorderProvider: React.FC = ({ children }) => {
 
       console.log(`Recording stoped, uri: ${uri}`);
 
+      const audioRecorder = saveNewAudioRecorder({
+        duration,
+        uri,
+        createDate: new Date(),
+      });
+
       setError(null);
       setRecording(null);
       setDuration(0);
 
-      return uri;
+      return audioRecorder;
     } catch ({ message }) {
       setError({ message });
       return null;
     }
-  }, [recording]);
+  }, [recording, saveNewAudioRecorder, duration]);
 
   useEffect(() => {
     if (!recording) {
       return;
     }
-    recording.setProgressUpdateInterval(1000)
-    recording.setOnRecordingStatusUpdate(({ durationMillis, isRecording }) => {
-      if (isRecording) {
-        setDuration(durationMillis)
+    recording.setProgressUpdateInterval(1000);
+    recording.setOnRecordingStatusUpdate(
+      ({ durationMillis, isRecording: isRecordingStatusUpdate }) => {
+        if (isRecordingStatusUpdate) {
+          setDuration(durationMillis);
+        }
       }
-    })
-  }, [recording])
+    );
+  }, [recording]);
 
   return (
     <RecorderContext.Provider
@@ -104,7 +164,8 @@ const RecorderProvider: React.FC = ({ children }) => {
         recording,
         error,
         isRecording,
-        durationFormatted
+        durationFormatted,
+        getAudiosRecorded,
       }}
     >
       {children}
