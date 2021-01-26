@@ -3605,6 +3605,11 @@ data-urls@^1.1.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
+date-fns@^2.16.1:
+  version "2.16.1"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.16.1.tgz#05775792c3f3331da812af253e1a935851d3834b"
+  integrity sha512-sAJVKx/FqrLYHAQeN7VpJrPhagZc9R4ImZIWYRFZaaohR3KzmuK88touwsSwSVT8Qcbd4zoDsnGfX4GFB4imyQ==
+
 dayjs@^1.8.15:
   version "1.10.3"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.10.3.tgz#cf3357c8e7f508432826371672ebf376cb7d619b"
@@ -3788,11 +3793,6 @@ domexception@^1.0.1:
   integrity sha512-raigMkn7CJNNo6Ihro1fzG7wr3fHuYVytzquZKX5n0yizGsTcYgzdIUwj1X9pK0VvjeihV+XiclP+DjwbsSKug==
   dependencies:
     webidl-conversions "^4.0.2"
-
-dooboolab-welcome@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/dooboolab-welcome/-/dooboolab-welcome-1.2.0.tgz#295818ce85a8e97dc90c0ec0510b4008e2d722dc"
-  integrity sha512-XgEbjJHAsKLge/e8jtuHsv84Ovg1Gx0GvnOTOmOlVGV1643nduTAkT3fyo/mxKbzvyXBr47RHaJAY4R2toI0UA==
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
@@ -4359,6 +4359,14 @@ expo-asset@~8.2.1:
     md5-file "^3.2.3"
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
+
+expo-av@~8.7.0:
+  version "8.7.0"
+  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-8.7.0.tgz#01030256dc75cebd5d02060393ba0ad36c10a7f8"
+  integrity sha512-tYw0z//UZm9THicOsu4w0A7Olq/JauTy7kcBR15Fhyppd9wd8Jtq7QYNtf2igd1R+byS2L0AGwE0nazlbQR+Qw==
+  dependencies:
+    lodash "^4.17.15"
+    nullthrows "^1.1.0"
 
 expo-constants@~9.3.0, expo-constants@~9.3.3:
   version "9.3.5"
@@ -7905,12 +7913,10 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
 
-react-native-audio-recorder-player@^2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/react-native-audio-recorder-player/-/react-native-audio-recorder-player-2.6.0.tgz#7cd4b302547afae231639a4769e436a0987006ce"
-  integrity sha512-MdbekBj5iKaDy2QXax8xDXcr952yVZrkqwUvQ36ffQWNsdUH6nKvlTJz70ELW6tJO40EbI4I3OoNnV2SlwOtWw==
-  dependencies:
-    dooboolab-welcome "^1.2.0"
+react-native-audio-player-recorder@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-audio-player-recorder/-/react-native-audio-player-recorder-2.0.0.tgz#356458423bb207d0c08816e7dda7cd7ce3f3a1fb"
+  integrity sha1-NWRYQjuyB9DAiBbn3afNfOPzofs=
 
 react-native-gesture-handler@^1.9.0:
   version "1.9.0"
