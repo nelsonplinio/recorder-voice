@@ -3,14 +3,17 @@ import {
   getBottomSpace,
   getStatusBarHeight,
 } from "react-native-iphone-x-helper";
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
-const bottomPadding = getBottomSpace();
-const statusBarHeight = getStatusBarHeight();
-
 const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
-
+const { bottomPadding, statusBarHeight } = Platform.select({
+  android: { bottomPadding: 0, statusBarHeight: 0 },
+  ios: {
+    bottomPadding: getBottomSpace(),
+    statusBarHeight: getStatusBarHeight(),
+  },
+});
 export const PLAY_PAUSE_BUTTON_SIZE = windowWidth * 0.4;
 
 const SECONDARY_COLOR = "#202640";
@@ -28,6 +31,11 @@ export const Container = styled.View`
 
 export const NameAudioContainer = styled.View`
   position: relative;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 16px;
 `;
 
 export const NameAudioInput = styled.TextInput.attrs({
@@ -46,11 +54,22 @@ export const NameAudioInput = styled.TextInput.attrs({
   color: ${TEXT_COLOR};
 `;
 
+export const RecorderListButton = styled.TouchableOpacity`
+  height: 40px;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const RecorderListButtonIcon = styled(FontAwesome)``;
+
 export const NameAudioText = styled.Text`
   font-size: 32px;
   font-weight: bold;
   opacity: 0.6;
+  flex: 1;
   color: ${TEXT_COLOR};
+  text-align: center;
 `;
 
 export const RecorderActionsContainer = styled.View`

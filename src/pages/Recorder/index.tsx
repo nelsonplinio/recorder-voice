@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  useRecorder,
-  RecordingType,
-  OnRecordingDurationData,
-} from "../../hooks/recorder";
+import { useNavigation } from "@react-navigation/native";
+import { useRecorder } from "../../hooks/recorder";
 
 import {
   Container,
   NameAudioContainer,
   NameAudioInput,
+  RecorderListButton,
+  RecorderListButtonIcon,
   NameAudioText,
   RecorderActionsContainer,
   RecorderStartAndPauseButton,
@@ -28,40 +27,32 @@ import {
 } from "./styles";
 
 const Recorder: React.FC = () => {
+  const navigation = useNavigation();
   const {
     startRecorderAudio,
     stopRecorderAudio,
     durationFormatted,
     error,
     isRecording,
-    getAudiosRecorded
-
   } = useRecorder();
 
+  const navigateToRecorderList = useCallback(() => {
+    navigation.navigate("RecorderList");
+  }, [navigation]);
 
-  useEffect(() => {
-
-    const test = async () => {
-      console.log('aquyiii, ', await getAudiosRecorded())
-    };
-  
-  
-    test();
-  }, [isRecording])
-
-  useEffect(() => {
-    const test = async () => {
-      console.log(await getAudiosRecorded())
-    };
-
-
-    test();
-  }, [isRecording])
   return (
     <Container>
       <NameAudioContainer>
         {/* <NameAudioInput placeholder="Escreva um titulo" /> */}
-        <NameAudioText>Audio gravando</NameAudioText>
+        <RecorderListButton />
+
+        <NameAudioText>
+          {isRecording ? "Gravando ..." : "Gravar Audio"}
+        </NameAudioText>
+
+        <RecorderListButton onPress={navigateToRecorderList}>
+          <RecorderListButtonIcon name="list" size={22} color="#f1f1f1" />
+        </RecorderListButton>
       </NameAudioContainer>
 
       <RecorderActionsContainer>
@@ -81,19 +72,19 @@ const Recorder: React.FC = () => {
 
       <FooterContainer>
         <RecorderTimingText>{durationFormatted}</RecorderTimingText>
-        <ActionsContainer>
+        {/* <ActionsContainer>
           <DeleteButton>
             <DeleteButtonText>Deletar</DeleteButtonText>
           </DeleteButton>
 
           <SaveButton>
             <SaveButtonText>Enviar</SaveButtonText>
-          </SaveButton>
+          </SaveButton> 
 
           <CommentButton>
             <CommentIcon name="comment" size={22} color="#f1f1f1" />
           </CommentButton>
-        </ActionsContainer>
+        </ActionsContainer> */}
       </FooterContainer>
     </Container>
   );

@@ -22,7 +22,7 @@ interface RecorderData {
   durationFormatted?: string;
   recording?: RecordingType;
   isRecording: boolean;
-  getAudiosRecorded: () => Promise<AudioRecorded[]>;
+  audiosRecorded: AudioRecorded[];
   startRecorderAudio: () => Promise<RecordingType>;
   stopRecorderAudio: () => Promise<AudioRecorded>;
 }
@@ -33,6 +33,7 @@ const RecorderProvider: React.FC = ({ children }) => {
   const [error, setError] = useState<RecorderError>();
   const [duration, setDuration] = useState<number>(0);
   const [recording, setRecording] = useState<RecordingType>();
+  const [audiosRecorded, setAudiosRecorded] = useState<AudioRecorded[]>();
 
   const durationFormatted = useMemo(() => formatDuration(duration / 1000), [
     duration,
@@ -69,31 +70,8 @@ const RecorderProvider: React.FC = ({ children }) => {
     }
   }, []);
 
-  const getAudiosRecorded = useCallback(async () => {
-    const audioSaved = await AsyncStorage.getItem(AUDIOS_RECORDED_KEY);
-    console.log("getAudiosRecorded");
-    if (!audioSaved) {
-      return [];
-    }
-
-    const audioRecoved = JSON.parse(audioSaved) as [];
-
-    return audioRecoved.map(
-      ({ id, name, duration: arDuration, uri, createDate }) =>
-        ({
-          id,
-          name,
-          duration: arDuration,
-          uri,
-          createDate: new Date(createDate),
-        } as AudioRecorded)
-    );
-  }, []);
-
   const saveNewAudioRecorder = useCallback(
     async (newAudioRecorded: Omit<AudioRecorded, "id">) => {
-      const audiosRecorded = await getAudiosRecorded();
-
       console.log(`New audio Saved in ${newAudioRecorded.uri}`);
 
       const audioToSave: AudioRecorded = {
@@ -107,9 +85,10 @@ const RecorderProvider: React.FC = ({ children }) => {
         JSON.stringify([audioToSave, ...audiosRecorded])
       );
 
+      setAudiosRecorded((current) => [audioToSave, ...current]);
       return audioToSave;
     },
-    [getAudiosRecorded]
+    [audiosRecorded]
   );
 
   const stopRecorderAudio = useCallback(async () => {
@@ -156,6 +135,31 @@ const RecorderProvider: React.FC = ({ children }) => {
     );
   }, [recording]);
 
+  useEffect(() => {
+    const getAudiosRecorded: () => Promise<any> = async () => {
+      const audioSaved = await AsyncStorage.getItem(AUDIOS_RECORDED_KEY);
+      if (!audioSaved) {
+        return [];
+      }
+
+      const audioRecoved = JSON.parse(audioSaved) as [];
+
+      const audioRecovedSaved = audioRecoved.map(
+        ({ id, name, duration: arDuration, uri, createDate }) =>
+          ({
+            id,
+            name,
+            duration: arDuration,
+            uri,
+            createDate: new Date(createDate),
+          } as AudioRecorded)
+      );
+
+      setAudiosRecorded(audioRecovedSaved);
+    };
+
+    getAudiosRecorded();
+  }, []);
   return (
     <RecorderContext.Provider
       value={{
@@ -165,7 +169,7 @@ const RecorderProvider: React.FC = ({ children }) => {
         error,
         isRecording,
         durationFormatted,
-        getAudiosRecorded,
+        audiosRecorded,
       }}
     >
       {children}
